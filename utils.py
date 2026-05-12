@@ -1,3 +1,19 @@
+# =========================================================================
+#   (c) Copyright 2025
+#   All rights reserved
+#   Programs written by Zhenduo Wang
+#   Department of Computer Science
+#   New Jersey Institute of Technology
+#   University Heights, Newark, NJ 07102, USA
+#
+#   Permission to use, copy, modify, and distribute this
+#   software and its documentation for any purpose and without
+#   fee is hereby granted, provided that this copyright
+#   notice appears in all copies. Programmer(s) makes no
+#   representations about the suitability of this
+#   software for any purpose.  It is provided "as is" without
+#   express or implied warranty.
+# =========================================================================
 import os
 import pickle
 import numpy as np
@@ -18,24 +34,118 @@ from torch.utils.data import DataLoader, TensorDataset
 from layers.Embed import DataEmbedding
 from layers.Conv_Blocks import Inception_Block_V1
 
-def create_sequences_fix(data, timesteps, predict_day):
+# =========================================================
+# Sequence Utilities
+# =========================================================
+
+def create_sequences(data, seq_len, pred_len, step=1):
     X, y = [], []
-    for i in range(len(data) - timesteps - predict_day):
-        X.append(data.iloc[i:(i + timesteps)])
-        y.append(data.iloc[(i + timesteps):(i + timesteps + predict_day)])
-        #y.append(data.iloc[(i + timesteps + predict_day)])
+
+    for i in range(0, len(data) - seq_len - pred_len, step):
+        X.append(data.iloc[i:i + seq_len])
+        y.append(data.iloc[i + seq_len:i + seq_len + pred_len])
+
     return np.array(X), np.array(y)
 
+
+def create_sequences_fix(data, timesteps, predict_day):
+    return create_sequences(data, timesteps, predict_day, step=1)
+
+
 def create_sequences_fix_test(data, timesteps, predict_day):
-    X, y = [], []
-    for i in range(0, len(data) - timesteps - predict_day, predict_day):
-        X.append(data.iloc[i:(i + timesteps)])
-        y.append(data.iloc[(i + timesteps):(i + timesteps + predict_day)])
-    return np.array(X), np.array(y)
+    return create_sequences(data, timesteps, predict_day, step=predict_day)
+
 
 def days(year):
     return pd.Timestamp(year, 12, 31).dayofyear
 
+
+# =========================================================
+# Data Loading and Preprocessing
+# =========================================================
+
+def load_and_process_raw_test(
+    preprocess_method_path,
+    raw_test_csv_path,
+    seq_len,
+    pred_len,
+    test_start="2009-01-01",
+    test_end_year=2021,
+):
+    with open(preprocess_method_path, "rb") as f:
+        preprocess_obj = pickle.load(f)
+
+    scaler = preprocess_obj["scaler"]
+    value_col = preprocess_obj["value_col"]
+
+    raw_test_df = pd.read_csv(raw_test_csv_path).fillna(0)
+    raw_test_df["date"] = pd.to_datetime(raw_test_df["date"])
+    raw_test_df = raw_test_df.sort_values("date").reset_index(drop=True)
+
+    # Include enough history before the target test start date.
+    start_date = pd.Timestamp(test_start) - pd.DateOffset(
+        days=seq_len + pred_len
+    )
+
+    test_df = raw_test_df[
+        (raw_test_df["date"] > start_date)
+        & (raw_test_df["date"].dt.year <= test_end_year)
+    ].copy()
+
+    test_scaled = scaler.transform(
+        test_df[value_col].values.reshape(-1, 1)
+    ).flatten()
+
+    TestX, Testy = create_sequences(
+        pd.Series(test_scaled),
+        seq_len,
+        pred_len,
+        step=1,
+    )
+
+    TestX = TestX.reshape(TestX.shape[0], TestX.shape[1], 1)
+    Testy = Testy.reshape(Testy.shape[0], Testy.shape[1], 1)
+
+    return TestX, Testy, scaler, test_df
+
+
+# =========================================================
+# DataLoader
+# =========================================================
+
+def build_dataloader(X, y, batch_size=32, shuffle=False):
+    dataset = TensorDataset(
+        torch.tensor(X, dtype=torch.float32),
+        torch.tensor(y, dtype=torch.float32),
+    )
+
+    return DataLoader(
+        dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+    )
+
+
+# =========================================================
+# Model Loading
+# =========================================================
+
+def load_sinet_model(model_path, configs, device):
+    ckpt = torch.load(model_path, map_location=device)
+
+    if isinstance(ckpt, dict):
+        model = Model(configs).to(device)
+        model.load_state_dict(ckpt)
+    else:
+        model = ckpt.to(device)
+
+    model.eval()
+    return model
+
+
+# =========================================================
+# SINet / TimesNet Architecture
+# =========================================================
 
 def FFT_for_Period(x, k=2):
     # [B, T, C]

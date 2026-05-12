@@ -1,3 +1,20 @@
+# =========================================================================
+#   (c) Copyright 2025
+#   All rights reserved
+#   Programs written by Zhenduo Wang
+#   Department of Computer Science
+#   New Jersey Institute of Technology
+#   University Heights, Newark, NJ 07102, USA
+#
+#   Permission to use, copy, modify, and distribute this
+#   software and its documentation for any purpose and without
+#   fee is hereby granted, provided that this copyright
+#   notice appears in all copies. Programmer(s) makes no
+#   representations about the suitability of this
+#   software for any purpose.  It is provided "as is" without
+#   express or implied warranty.
+# =========================================================================
+
 from utils import *
 
 # =========================================================
