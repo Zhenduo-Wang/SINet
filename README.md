@@ -13,7 +13,7 @@ The F10.7 and F30 solar indices are the solar radio fluxes measured at wavelengt
 
 - `data/`: Directory containing test datasets.
 - `layers/`: Neural network layers and helper modules.
-- `model/`: Directory containing pretrained models.
+- `models/`: Directory containing pretrained models.
 - `utils.py`: Model architecture and utility functions.
 - `F107_test.py`: Testing script for F10.7 prediction.
 - `F30_test.py`: Testing script for F30 prediction.
@@ -54,7 +54,7 @@ python F30_test.py
 Pretrained models are stored under:
 
 ```text
-model/
+models/
 ```
 
 The code for loading pretrained models is included in the testing scripts.
