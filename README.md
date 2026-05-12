@@ -62,8 +62,4 @@ The code for loading pretrained models is included in the testing scripts.
 
 ## Reference
 
-- Wang, Z., Abdallah, Y., Wang, J. T. L., Wang, H., Xu, Y.,  
-  Yurchyshyn, V., Oria, V., Alobaid, K. A., & Bai, X. (2026).  
-  *Daily Predictions of F10.7 and F30 Solar Indices With Deep Learning*.  
-  Journal of Geophysical Research: Space Physics.  
-  https://doi.org/10.1029/2025JA034868
+- Wang, Z., Abdallah, Y., Wang, J. T. L., Wang, H., Xu, Y., Yurchyshyn, V., Oria, V., Alobaid, K. A., & Bai, X. (2026). *Daily Predictions of F10.7 and F30 Solar Indices With Deep Learning*. Journal of Geophysical Research: Space Physics.https://doi.org/10.1029/2025JA034868
