@@ -17,6 +17,7 @@ The F10.7 and F30 solar indices are the solar radio fluxes measured at wavelengt
 - `utils.py`: Model architecture and utility functions.
 - `F107_test.py`: Testing script for F10.7 prediction.
 - `F30_test.py`: Testing script for F30 prediction.
+- `prediction_workflow.ipynb`: Workflow of prediction.
 
 ## Requirements
 
