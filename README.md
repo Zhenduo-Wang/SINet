@@ -29,6 +29,7 @@ pandas>=1.3
 matplotlib>=3.4
 scikit-learn>=0.24
 torch>=1.12
+```
 
 ## Testing
 
